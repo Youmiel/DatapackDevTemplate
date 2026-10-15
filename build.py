@@ -1,4 +1,9 @@
 import sys
+
+# Importing build_settings, the framework and the patches must not leave
+# __pycache__ directories behind inside the project tree.
+sys.dont_write_bytecode = True
+
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent

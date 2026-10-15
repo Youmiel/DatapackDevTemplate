@@ -1,31 +1,11 @@
-from pathlib import Path
-import typing as ty
+from patch_lib import mcmeta
 
 TYPE = 'json'
 
 # pack_format of the MC version this pack targets.
 PACK_FORMAT = 1
 
-# Version number of this datapack, written into every generated pack.mcmeta.
-# It is captured in reference_file() and read back in process_single().
-version_cache = '0.0.0'
-
-
-def reference_file(patch_path: Path, patch_version_config: ty.Dict[str, str]) \
-        -> ty.Union[ty.Tuple[str, Path, Path], ty.List[ty.Tuple[str, Path, Path]], None]:
-    global version_cache
-    file_name = patch_path.with_suffix('').with_name(patch_path.stem.replace('___', '.'))
-    version_cache = patch_version_config['version']
-
-    return ('COMMON', Path('pack.mcmeta'), file_name)
-
-
-def process_single(content: ty.Tuple[Path, ty.Dict]) -> ty.Tuple[Path, ty.Dict]:
-    new_path, json_content = content
-    json_content['pack']['pack_format'] = PACK_FORMAT
-    json_content['pack']['version'] = version_cache
-    return (new_path, json_content)
-
-
-def process_multi(content: ty.List[ty.Tuple[Path, ty.Dict]]) -> ty.List[ty.Tuple[Path, ty.Dict]]:
-    return []
+# reference_file and process_single come from the shared helper; the per-version
+# data stays here. A version whose pack.mcmeta also needs supported_formats or
+# overlays passes them as extra arguments, see patch_lib/mcmeta.py.
+reference_file, process_single = mcmeta.make(PACK_FORMAT)
